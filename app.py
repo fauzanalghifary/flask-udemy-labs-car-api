@@ -2,6 +2,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import Flask, render_template, redirect, request, url_for, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_, text
 import uuid
 import random
 
@@ -94,8 +95,49 @@ with app.app_context():
 def get_cars():
     page = request.args.get('page', 1, type=int)
     size = request.args.get('size', 10, type=int)
+    brand = request.args.get('brand', '%')
+    model = request.args.get('model', '%')
+    transmission = request.args.get('transmission', '%')
 
-    cars = Car.query.paginate(page=page, per_page=size)
+    price_operator = request.args.get('price_operator')
+    price_value = request.args.get('price', 0, type=int)
+    price_max_value = request.args.get('price_max', price_value + 1, type=int)
+
+    sort_by = request.args.get('sort_by')
+    sort_direction = request.args.get('sort_direction')
+
+    query = Car.query
+
+    query = query.filter(and_(
+        Car.brand.ilike('%' + brand + '%'),
+        Car.model.ilike('%' + model + '%'),
+        Car.transmission.ilike('%' + transmission + '%')
+    ))
+
+    if price_operator == 'lte':
+        query = query.filter(Car.price <= price_value)
+    elif price_operator == 'gte':
+        query = query.filter(Car.price >= price_value)
+    elif price_operator == 'between':
+        query = query.filter(Car.price.between(price_value, price_max_value))
+
+    list_sort_by = sort_by.split(',')
+    list_sort_direction = sort_direction.split(',')
+    diff = len(list_sort_by) - len(list_sort_direction)
+    for x in range(diff):
+        list_sort_direction.append('asc')
+
+    # if sort_by and sort_direction == 'asc':
+    #     query = query.order_by(getattr(Car, sort_by).asc())
+    # elif sort_by and sort_direction == 'desc':
+    #     query = query.order_by(getattr(Car, sort_by).desc())
+
+    sort_columns = []
+    for idx, sb in enumerate(list_sort_by):
+        sort_columns.append(sb + ' ' + list_sort_direction[idx])
+    query = query.order_by(text(','.join(sort_columns)))
+
+    cars = query.paginate(page=page, per_page=size)
     cars_json = [car.to_json() for car in cars.items]
 
     return jsonify(

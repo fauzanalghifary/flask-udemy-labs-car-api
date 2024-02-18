@@ -1,2 +1,9 @@
 ### GET ALL CARS
-GET {{BASE_URL}}/api/cars?size=20&page=20
+GET {{BASE_URL}}/api/cars?size=20&page=1
+    &brand=onda
+    &sort_by=release_year,price&sort_direction=desc,asc
+#    &sort_by=price
+#    &sort_direction=asc
+#    &model=BMW%2083
+#    &transmission=AUTOMATIC
+#    &price_operator=gte&price=77493
