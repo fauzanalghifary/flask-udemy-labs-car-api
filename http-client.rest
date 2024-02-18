@@ -1,2 +1,2 @@
 ### GET ALL CARS
-GET {{BASE_URL}}/api/cars
+GET {{BASE_URL}}/api/cars?size=20&page=20
