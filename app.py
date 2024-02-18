@@ -95,10 +95,6 @@ def get_cars():
     page = request.args.get('page', 1, type=int)
     size = request.args.get('size', 10, type=int)
 
-    # cars = Car.query.all()
-    # paginated_cars = paginate(cars, page, size)
-    # cars_json = [car.to_json() for car in paginated_cars]
-
     cars = Car.query.paginate(page=page, per_page=size)
     cars_json = [car.to_json() for car in cars.items]
 
