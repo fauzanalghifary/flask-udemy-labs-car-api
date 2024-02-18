@@ -1,0 +1,2 @@
+### GET ALL CARS
+GET {{BASE_URL}}/api/cars
